@@ -6,5 +6,13 @@ import './styles.css';
 import { RoutineProvider } from './features/routines/RoutineContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode><BrowserRouter><ThemeProvider><RoutineProvider><App /></RoutineProvider></ThemeProvider></BrowserRouter></React.StrictMode>,
+  <React.StrictMode>
+    <BrowserRouter>
+      <ThemeProvider>
+        <RoutineProvider>
+          <App />
+        </RoutineProvider>
+      </ThemeProvider>
+    </BrowserRouter>
+  </React.StrictMode>,
 );

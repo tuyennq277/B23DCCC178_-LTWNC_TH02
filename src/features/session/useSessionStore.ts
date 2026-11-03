@@ -14,19 +14,31 @@ export interface SessionState {
   tick: () => void;
 }
 export const useSessionStore = create<SessionState>()((set, get) => ({
-  queue: [], currentIndex: -1, isRunning: false, elapsed: 0,
+  queue: [],
+  currentIndex: -1,
+  isRunning: false,
+  elapsed: 0,
   startSession: (exercises, startIndex) => {
     if (!exercises.length || startIndex < 0 || startIndex >= exercises.length) {
       set({ queue: [], currentIndex: -1, isRunning: false, elapsed: 0 });
       return;
     }
-    set({ queue: [...exercises], currentIndex: startIndex, isRunning: true, elapsed: 0 });
+    set({
+      queue: [...exercises],
+      currentIndex: startIndex,
+      isRunning: true,
+      elapsed: 0,
+    });
   },
   toggleRun: () => {
     const { queue, currentIndex, isRunning, elapsed } = get();
     if (!queue.length) return;
     const index = Math.max(0, currentIndex);
-    set({ currentIndex: index, isRunning: !isRunning, elapsed: elapsed >= queue[index].duration ? 0 : elapsed });
+    set({
+      currentIndex: index,
+      isRunning: !isRunning,
+      elapsed: elapsed >= queue[index].duration ? 0 : elapsed,
+    });
   },
   next: () => {
     const { queue, currentIndex } = get();
@@ -40,7 +52,10 @@ export const useSessionStore = create<SessionState>()((set, get) => ({
   prev: () => {
     const { currentIndex, elapsed } = get();
     if (currentIndex < 0) return;
-    set({ currentIndex: elapsed > 3 ? currentIndex : Math.max(0, currentIndex - 1), elapsed: 0 });
+    set({
+      currentIndex: elapsed > 3 ? currentIndex : Math.max(0, currentIndex - 1),
+      elapsed: 0,
+    });
   },
   addToSession: (exercise) => {
     if (!get().queue.some((item) => item.id === exercise.id)) {

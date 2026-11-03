@@ -17,8 +17,23 @@ interface RowData {
   onAddRoutine: (exercise: Exercise) => void;
   routineSelected: boolean;
 }
-const VirtualRow = memo(function VirtualRow({ index, style, data }: ListChildComponentProps<RowData>) {
-  return <ExerciseRow exercise={data.exercises[index]} index={index} style={style} onStart={data.onStart} onSave={data.onSave} onAdd={data.onAdd} onAddRoutine={data.onAddRoutine} routineSelected={data.routineSelected} />;
+const VirtualRow = memo(function VirtualRow({
+  index,
+  style,
+  data,
+}: ListChildComponentProps<RowData>) {
+  return (
+    <ExerciseRow
+      exercise={data.exercises[index]}
+      index={index}
+      style={style}
+      onStart={data.onStart}
+      onSave={data.onSave}
+      onAdd={data.onAdd}
+      onAddRoutine={data.onAddRoutine}
+      routineSelected={data.routineSelected}
+    />
+  );
 }, areEqual);
 const itemKey = (index: number, data: RowData) => data.exercises[index].id;
 export default function LibraryPage() {
@@ -28,41 +43,183 @@ export default function LibraryPage() {
   const routines = useRoutines();
   const dispatch = useRoutineDispatch();
   const [selectedRoutine, setSelectedRoutine] = useState('');
-  const activeRoutine = routines.some((routine) => routine.id === selectedRoutine) ? selectedRoutine : (routines[0]?.id ?? '');
+  const activeRoutine = routines.some(
+    (routine) => routine.id === selectedRoutine,
+  )
+    ? selectedRoutine
+    : (routines[0]?.id ?? '');
   const debouncedKeyword = useDebounce(keyword, 300);
   const exercises = useMemo(() => {
     const query = debouncedKeyword.trim().toLocaleLowerCase('vi');
-    const filtered = EXERCISES.filter((exercise) => (!group || exercise.group === group) && (exercise.name.toLocaleLowerCase('vi').includes(query) || exercise.trainer.toLocaleLowerCase('vi').includes(query)));
-    if (sort === 'name') return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
-    if (sort === 'duration') return [...filtered].sort((a, b) => a.duration - b.duration);
+    const filtered = EXERCISES.filter(
+      (exercise) =>
+        (!group || exercise.group === group) &&
+        (exercise.name.toLocaleLowerCase('vi').includes(query) ||
+          exercise.trainer.toLocaleLowerCase('vi').includes(query)),
+    );
+    if (sort === 'name')
+      return [...filtered].sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    if (sort === 'duration')
+      return [...filtered].sort((a, b) => a.duration - b.duration);
     return filtered;
   }, [debouncedKeyword, group, sort]);
-  const handleKeywordShift = useCallback((event: ChangeEvent<HTMLInputElement>) => setKeyword(event.target.value), []);
+  const handleKeywordShift = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => setKeyword(event.target.value),
+    [],
+  );
   const startSession = useSessionStore((state) => state.startSession);
   const addToSession = useSessionStore((state) => state.addToSession);
   const toggle = useSavedStore((state) => state.toggle);
-  const onStart = useCallback((exercise: Exercise) => startSession(exercises, exercises.findIndex((item) => item.id === exercise.id)), [exercises, startSession]);
+  const onStart = useCallback(
+    (exercise: Exercise) =>
+      startSession(
+        exercises,
+        exercises.findIndex((item) => item.id === exercise.id),
+      ),
+    [exercises, startSession],
+  );
   const onSave = useCallback((id: string) => toggle(id), [toggle]);
-  const onAdd = useCallback((exercise: Exercise) => addToSession(exercise), [addToSession]);
-  const onAddRoutine = useCallback((exercise: Exercise) => { if (activeRoutine) dispatch({ type: 'addExercise', id: activeRoutine, exerciseId: exercise.id }); }, [activeRoutine, dispatch]);
-  const itemData = useMemo(() => ({ exercises, onStart, onSave, onAdd, onAddRoutine, routineSelected: !!activeRoutine }), [exercises, onStart, onSave, onAdd, onAddRoutine, activeRoutine]);
+  const onAdd = useCallback(
+    (exercise: Exercise) => addToSession(exercise),
+    [addToSession],
+  );
+  const onAddRoutine = useCallback(
+    (exercise: Exercise) => {
+      if (activeRoutine)
+        dispatch({
+          type: 'addExercise',
+          id: activeRoutine,
+          exerciseId: exercise.id,
+        });
+    },
+    [activeRoutine, dispatch],
+  );
+  const itemData = useMemo(
+    () => ({
+      exercises,
+      onStart,
+      onSave,
+      onAdd,
+      onAddRoutine,
+      routineSelected: !!activeRoutine,
+    }),
+    [exercises, onStart, onSave, onAdd, onAddRoutine, activeRoutine],
+  );
   return (
     <>
-      <section className="hero"><div><p className="eyebrow">KHỞI ĐỘNG MỘT THÓI QUEN TỐT</p><h1>Mỗi nhịp tập.<br /><span>Một bước tiến.</span></h1><p className="hero-description">Chọn bài tập, tạo giáo án và bắt đầu theo nhịp của bạn.</p></div><div className="hero-stat"><span className="stat-orbit">↗</span><strong>10.000</strong><span>bài tập · 5 nhóm cơ · 1 mục tiêu</span></div></section>
-      <section className="library-section" aria-labelledby="library-heading">
-        <div className="section-title"><div><p className="eyebrow">KHÁM PHÁ & TẬP LUYỆN</p><h2 id="library-heading">Kho bài tập</h2></div><span className="section-note">Một khởi đầu cho mọi buổi tập.</span></div>
-        <div className="filters">
-          <label className="search-field">Tìm kiếm<input value={keyword} onChange={handleKeywordShift} placeholder="Tên bài tập hoặc huấn luyện viên…" type="search" /></label>
-          <label>Nhóm cơ<select value={group} onChange={(event) => setGroup(event.target.value as MuscleGroup | '')}><option value="">Tất cả</option>{GROUPS.map((item) => <option key={item}>{item}</option>)}</select></label>
-          <label>Sắp xếp<select value={sort} onChange={(event) => setSort(event.target.value)}><option value="default">Mặc định</option><option value="name">Tên A–Z</option><option value="duration">Thời lượng tăng dần</option></select></label>
-          <label>Giáo án đang chọn<select value={activeRoutine} disabled={!routines.length} onChange={(event) => setSelectedRoutine(event.target.value)}>{!routines.length && <option value="">Chưa có giáo án</option>}{routines.map((routine) => <option value={routine.id} key={routine.id}>{routine.name}</option>)}</select></label>
+      <section className="hero">
+        <div>
+          <p className="eyebrow">KHỞI ĐỘNG MỘT THÓI QUEN TỐT</p>
+          <h1>
+            Mỗi nhịp tập.
+            <br />
+            <span>Một bước tiến.</span>
+          </h1>
+          <p className="hero-description">
+            Chọn bài tập, tạo giáo án và bắt đầu theo nhịp của bạn.
+          </p>
         </div>
-        <p className="result-count" role="status">Tìm thấy <strong>{exercises.length}</strong> bài tập</p>
-        <div className="exercise-table"><div className="table-heading"><span>#</span><span>BÀI TẬP</span><span>HUẤN LUYỆN VIÊN</span><span>NHÓM CƠ</span><span>THỜI GIAN</span><span>THAO TÁC</span></div>
-          {exercises.length ? <FixedSizeList height={560} itemSize={56} width="100%" itemCount={exercises.length} itemData={itemData} itemKey={itemKey} overscanCount={2}>{VirtualRow}</FixedSizeList> : <div className="empty-state"><span>⌕</span><h3>Không tìm thấy bài tập nào.</h3><p>Thử một từ khóa hoặc nhóm cơ khác nhé.</p></div>}
+        <div className="hero-stat">
+          <span className="stat-orbit">↗</span>
+          <strong>10.000</strong>
+          <span>bài tập · 5 nhóm cơ · 1 mục tiêu</span>
         </div>
       </section>
-      <p className="page-footnote">TIẾN BỘ BẮT ĐẦU TỪ VIỆC XUẤT HIỆN. HẸN BẠN Ở BUỔI TẬP HÔM NAY.</p>
+      <section className="library-section" aria-labelledby="library-heading">
+        <div className="section-title">
+          <div>
+            <p className="eyebrow">KHÁM PHÁ & TẬP LUYỆN</p>
+            <h2 id="library-heading">Kho bài tập</h2>
+          </div>
+          <span className="section-note">Một khởi đầu cho mọi buổi tập.</span>
+        </div>
+        <div className="filters">
+          <label className="search-field">
+            Tìm kiếm
+            <input
+              value={keyword}
+              onChange={handleKeywordShift}
+              placeholder="Tên bài tập hoặc huấn luyện viên…"
+              type="search"
+            />
+          </label>
+          <label>
+            Nhóm cơ
+            <select
+              value={group}
+              onChange={(event) =>
+                setGroup(event.target.value as MuscleGroup | '')
+              }
+            >
+              <option value="">Tất cả</option>
+              {GROUPS.map((item) => (
+                <option key={item}>{item}</option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Sắp xếp
+            <select
+              value={sort}
+              onChange={(event) => setSort(event.target.value)}
+            >
+              <option value="default">Mặc định</option>
+              <option value="name">Tên A–Z</option>
+              <option value="duration">Thời lượng tăng dần</option>
+            </select>
+          </label>
+          <label>
+            Giáo án đang chọn
+            <select
+              value={activeRoutine}
+              disabled={!routines.length}
+              onChange={(event) => setSelectedRoutine(event.target.value)}
+            >
+              {!routines.length && <option value="">Chưa có giáo án</option>}
+              {routines.map((routine) => (
+                <option value={routine.id} key={routine.id}>
+                  {routine.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="result-count" role="status">
+          Tìm thấy <strong>{exercises.length}</strong> bài tập
+        </p>
+        <div className="exercise-table">
+          <div className="table-heading">
+            <span>#</span>
+            <span>BÀI TẬP</span>
+            <span>HUẤN LUYỆN VIÊN</span>
+            <span>NHÓM CƠ</span>
+            <span>THỜI GIAN</span>
+            <span>THAO TÁC</span>
+          </div>
+          {exercises.length ? (
+            <FixedSizeList
+              height={560}
+              itemSize={56}
+              width="100%"
+              itemCount={exercises.length}
+              itemData={itemData}
+              itemKey={itemKey}
+              overscanCount={2}
+            >
+              {VirtualRow}
+            </FixedSizeList>
+          ) : (
+            <div className="empty-state">
+              <span>⌕</span>
+              <h3>Không tìm thấy bài tập nào.</h3>
+              <p>Thử một từ khóa hoặc nhóm cơ khác nhé.</p>
+            </div>
+          )}
+        </div>
+      </section>
+      <p className="page-footnote">
+        TIẾN BỘ BẮT ĐẦU TỪ VIỆC XUẤT HIỆN. HẸN BẠN Ở BUỔI TẬP HÔM NAY.
+      </p>
     </>
   );
 }

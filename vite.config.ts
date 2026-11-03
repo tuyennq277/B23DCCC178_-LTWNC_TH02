@@ -3,7 +3,12 @@ import react from '@vitejs/plugin-react';
 export default defineConfig({
   plugins: [react()],
   test: {
-    environment: 'jsdom', setupFiles: './src/setupTests.ts',
-    coverage: { include: ['src/features/**', 'src/utils/**'], reporter: ['text', 'html', 'json-summary'], thresholds: { lines: 70 } },
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.ts',
+    coverage: {
+      include: ['src/features/**', 'src/utils/**'],
+      reporter: ['text', 'html', 'json-summary'],
+      thresholds: { lines: 70 },
+    },
   },
 });

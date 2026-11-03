@@ -1,12 +1,28 @@
 import type { Exercise, MuscleGroup } from '../types';
 const MOVE = ['Đẩy', 'Kéo', 'Gập', 'Nâng', 'Ép', 'Xoay', 'Bật', 'Giữ'];
 const VARIANT = [
-  'tạ đơn', 'tạ đòn', 'dây kháng lực', 'trên ghế', 'một tay',
-  'hai tay', 'nghiêng', 'chậm', 'tốc độ', 'tại chỗ',
+  'tạ đơn',
+  'tạ đòn',
+  'dây kháng lực',
+  'trên ghế',
+  'một tay',
+  'hai tay',
+  'nghiêng',
+  'chậm',
+  'tốc độ',
+  'tại chỗ',
 ];
 const TRAINERS = [
-  'Minh Khang', 'Thu Trang', 'Hải Đăng', 'Phương Anh', 'Gia Bảo',
-  'Lan Chi', 'Đức Anh', 'Khánh Linh', 'Văn Toàn', 'Mai Hương',
+  'Minh Khang',
+  'Thu Trang',
+  'Hải Đăng',
+  'Phương Anh',
+  'Gia Bảo',
+  'Lan Chi',
+  'Đức Anh',
+  'Khánh Linh',
+  'Văn Toàn',
+  'Mai Hương',
 ];
 export const GROUPS: MuscleGroup[] = ['Ngực', 'Lưng', 'Chân', 'Vai', 'Tay'];
 export const generateExercises = (count: number): Exercise[] =>
