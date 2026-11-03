@@ -3,5 +3,6 @@ dist/
 coverage/
 tmp/
 *.local
+*.tsbuildinfo
 .env*
 !.env.example
