@@ -6,6 +6,8 @@ import { EXERCISES, GROUPS } from '../../data/exercises';
 import { useDebounce } from '../../hooks/useDebounce';
 import type { Exercise, MuscleGroup } from '../../types';
 import { ExerciseRow } from './ExerciseRow';
+import { useSessionStore } from '../session/useSessionStore';
+import { useSavedStore } from '../saved/useSavedStore';
 interface RowData {
   exercises: Exercise[];
   onStart: (exercise: Exercise) => void;
@@ -29,9 +31,12 @@ export default function LibraryPage() {
     return filtered;
   }, [debouncedKeyword, group, sort]);
   const handleKeywordShift = useCallback((event: ChangeEvent<HTMLInputElement>) => setKeyword(event.target.value), []);
-  const onStart = useCallback((exercise: Exercise) => { void exercise; }, []);
-  const onSave = useCallback((id: string) => { void id; }, []);
-  const onAdd = useCallback((exercise: Exercise) => { void exercise; }, []);
+  const startSession = useSessionStore((state) => state.startSession);
+  const addToSession = useSessionStore((state) => state.addToSession);
+  const toggle = useSavedStore((state) => state.toggle);
+  const onStart = useCallback((exercise: Exercise) => startSession(exercises, exercises.findIndex((item) => item.id === exercise.id)), [exercises, startSession]);
+  const onSave = useCallback((id: string) => toggle(id), [toggle]);
+  const onAdd = useCallback((exercise: Exercise) => addToSession(exercise), [addToSession]);
   const itemData = useMemo(() => ({ exercises, onStart, onSave, onAdd }), [exercises, onStart, onSave, onAdd]);
   return (
     <>
